@@ -1,0 +1,76 @@
+parameters: ~
+
+services:
+
+    # php parser services
+    rest_proxy.php_parser.lexer:
+        class: PhpParser\Lexer
+
+    rest_proxy.php_parser.traverser:
+        class: PhpParser\NodeTraverser
+
+    rest_proxy.php_parser.printer:
+        class: PhpParser\PrettyPrinter\Standard
+
+    rest_proxy.php_parser.parser:
+        class: PhpParser\Parser
+        arguments:
+            - '@rest_proxy.php_parser.lexer'
+
+    # Symfony services
+    rest_proxy.filesystem:
+        class: Symfony\Component\Filesystem\Filesystem
+
+    rest_proxy.class_finder:
+        class: Symfony\Component\Finder\Finder
+        calls:
+            - [files, []]
+            - [in, ['%kernel.root_dir%/../src']]
+            - [name, ['*.php']]
+            - [contains, ['/class/i']]
+
+    # rest proxy services
+    rest_proxy.parser.class_parser:
+        class: Pfrembot\RestProxyBundle\Parser\ClassFileParser
+        arguments:
+            - '@rest_proxy.php_parser.parser'
+            - '@rest_proxy.php_parser.traverser'
+
+    rest_proxy.finder.class_finder:
+        class: Pfrembot\RestProxyBundle\Finder\ProxyClassFinder
+        arguments:
+            - '@rest_proxy.class_finder'
+            - '@annotations.cached_reader'
+            - '@rest_proxy.parser.class_parser'
+
+    rest_proxy.builder.proxy_builder:
+        class: Pfrembot\RestProxyBundle\Builder\ProxyBuilder
+        arguments:
+            - '@rest_proxy.php_parser.parser'
+            - '@annotations.cached_reader'
+
+    ## proxy cache warmer
+    resr_proxy.proxy_cache:
+        class: Pfrembot\RestProxyBundle\Cache\ProxyCache
+        arguments:
+            - '@rest_proxy.php_parser.printer'
+            - '@rest_proxy.filesystem'
+            - '%kernel.cache_dir%'
+
+    rest_proxy.cache_warmer:
+        class: Pfrembot\RestProxyBundle\Cache\CacheWarmer
+        arguments:
+            - '@rest_proxy.finder.class_finder'
+            - '@rest_proxy.builder.proxy_builder'
+            - '@resr_proxy.proxy_cache'
+        tags:
+            - { name: kernel.cache_warmer }
+
+    ## serializer subscriber
+    rest_proxy.api.serialization.subscriber:
+        class: Pfrembot\RestProxyBundle\Subscriber\SerializerSubscriber
+        arguments:
+            - @annotation_reader
+            - @service_container
+        tags:
+            - { name: jms_serializer.event_subscriber }
