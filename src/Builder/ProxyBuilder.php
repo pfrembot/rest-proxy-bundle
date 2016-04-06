@@ -10,22 +10,22 @@ use Doctrine\Common\Annotations\Reader;
 use PhpParser\Builder;
 use PhpParser\BuilderFactory;
 use PhpParser\Parser;
-use PhpParser\PrettyPrinter;
 use Pfrembot\RestProxyBundle\Annotation as RestProxy;
 use Pfrembot\RestProxyBundle\Cache\ProxyCache;
+use Pfrembot\RestProxyBundle\Proxy\ProxyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Class ProxyBuilder
+ *
+ * @package Pfrembot\RestProxyBundle\Builder
+ */
 class ProxyBuilder
 {
     /**
      * @var BuilderFactory
      */
     private $factory;
-
-    /**
-     * @var PrettyPrinter\Standard
-     */
-    private $printer;
 
     /**
      * @var Parser
@@ -68,7 +68,6 @@ class ProxyBuilder
     public function __construct(Parser $parser, Reader $reader)
     {
         $this->factory = new BuilderFactory();
-        $this->printer = new PrettyPrinter\Standard();
         $this->parser = $parser;
         $this->reader = $reader;
     }
@@ -77,7 +76,7 @@ class ProxyBuilder
      * Return builder class model
      *
      * @param \ReflectionClass $reflection
-     * @return Builder\Class_|Builder\Namespace_
+     * @return Builder\Namespace_
      */
     public function build(\ReflectionClass $reflection)
     {
@@ -106,6 +105,7 @@ class ProxyBuilder
     {
         return $this->factory->class($reflection->getShortName())
             ->extend('BaseClass')
+            ->implement(ProxyInterface::class)
             ->makeFinal()
             ->setDocComment('/** ProxyClass */')
             ->addStmt($this->factory->property('__container__')
