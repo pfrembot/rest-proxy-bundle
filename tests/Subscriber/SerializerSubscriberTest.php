@@ -1,6 +1,6 @@
 <?php
 /**
- * File SerializerSubscriberTest.php.
+ * File SerializerSubscriberTest.php
  *
  * @author Edward Pfremmer <epfremme@nerdery.com>
  */
