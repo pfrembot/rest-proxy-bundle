@@ -13,6 +13,7 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\EventDispatcher\PreDeserializeEvent;
 use Pfrembot\RestProxyBundle\Annotation\Entity;
 use Pfrembot\RestProxyBundle\Cache\ProxyCache;
+use Pfrembot\RestProxyBundle\Proxy\ProxyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -77,7 +78,7 @@ class SerializerSubscriber implements EventSubscriberInterface
     {
         $object = $event->getObject();
 
-        if (method_exists($object, '__initialize__')) {
+        if ($object instanceof ProxyInterface) {
             $object->__initialize__($this->container);
         }
     }
