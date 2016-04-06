@@ -40,14 +40,14 @@ services:
         class: Pfrembot\RestProxyBundle\Finder\ProxyClassFinder
         arguments:
             - '@rest_proxy.class_finder'
-            - '@annotations.cached_reader'
+            - '@annotation_reader'
             - '@rest_proxy.parser.class_parser'
 
     rest_proxy.builder.proxy_builder:
         class: Pfrembot\RestProxyBundle\Builder\ProxyBuilder
         arguments:
             - '@rest_proxy.php_parser.parser'
-            - '@annotations.cached_reader'
+            - '@annotation_reader'
 
     ## proxy cache warmer
     resr_proxy.proxy_cache:
