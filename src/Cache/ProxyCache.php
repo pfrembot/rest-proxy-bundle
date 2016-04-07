@@ -22,14 +22,14 @@ class ProxyCache
     const NAMESPACE_PREFIX = 'RestProxy';
 
     /**
-     * @var PrettyPrinterAbstract
-     */
-    private $printer;
-
-    /**
      * @var Filesystem
      */
     private $fs;
+
+    /**
+     * @var PrettyPrinterAbstract
+     */
+    private $printer;
 
     /**
      * @var string
@@ -59,6 +59,7 @@ class ProxyCache
      * Write proxy class to disk
      *
      * @param BuilderAbstract|Builder\Namespace_ $model
+     * @param string $name
      */
     public function write(BuilderAbstract $model, $name)
     {
