@@ -4,24 +4,30 @@ services:
 
     # php parser services
     rest_proxy.php_parser.lexer:
+        public: false
         class: PhpParser\Lexer
 
     rest_proxy.php_parser.traverser:
+        public: false
         class: PhpParser\NodeTraverser
 
     rest_proxy.php_parser.printer:
+        public: false
         class: PhpParser\PrettyPrinter\Standard
 
     rest_proxy.php_parser.parser:
+        public: false
         class: PhpParser\Parser
         arguments:
             - '@rest_proxy.php_parser.lexer'
 
     # Symfony services
-    rest_proxy.filesystem:
+    rest_proxy.symfony.filesystem:
+        public: false
         class: Symfony\Component\Filesystem\Filesystem
 
-    rest_proxy.class_finder:
+    rest_proxy.symfony.finder:
+        public: false
         class: Symfony\Component\Finder\Finder
         calls:
             - [files, []]
@@ -29,35 +35,40 @@ services:
             - [name, ['*.php']]
             - [contains, ['/class/i']]
 
-    # rest proxy services
+    # rest proxy builder services
     rest_proxy.parser.class_parser:
+        public: false
         class: Pfrembot\RestProxyBundle\Parser\ClassFileParser
         arguments:
             - '@rest_proxy.php_parser.parser'
             - '@rest_proxy.php_parser.traverser'
 
     rest_proxy.finder.class_finder:
+        public: false
         class: Pfrembot\RestProxyBundle\Finder\ProxyClassFinder
         arguments:
-            - '@rest_proxy.class_finder'
+            - '@rest_proxy.symfony.finder'
             - '@annotation_reader'
             - '@rest_proxy.parser.class_parser'
 
     rest_proxy.builder.proxy_builder:
+        public: false
         class: Pfrembot\RestProxyBundle\Builder\ProxyBuilder
         arguments:
             - '@rest_proxy.php_parser.parser'
             - '@annotation_reader'
 
-    ## proxy cache warmer
-    resr_proxy.proxy_cache:
+    ## proxy cache services
+    rest_proxy.proxy_cache:
+        public: false
         class: Pfrembot\RestProxyBundle\Cache\ProxyCache
         arguments:
             - '@rest_proxy.php_parser.printer'
-            - '@rest_proxy.filesystem'
+            - '@rest_proxy.symfony.filesystem'
             - '%kernel.cache_dir%'
 
     rest_proxy.cache_warmer:
+        public: false
         class: Pfrembot\RestProxyBundle\Cache\CacheWarmer
         arguments:
             - '@rest_proxy.finder.class_finder'
@@ -66,11 +77,12 @@ services:
         tags:
             - { name: kernel.cache_warmer }
 
-    ## serializer subscriber
-    rest_proxy.api.serialization.subscriber:
+    ## proxy serializer subscriber
+    rest_proxy.serializer.subscriber:
+        public: false
         class: Pfrembot\RestProxyBundle\Subscriber\SerializerSubscriber
         arguments:
-            - @annotation_reader
-            - @service_container
+            - '@annotation_reader'
+            - '@service_container'
         tags:
             - { name: jms_serializer.event_subscriber }

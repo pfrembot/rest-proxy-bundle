@@ -105,10 +105,10 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
 
         $this->reader->shouldReceive('getMethodAnnotation')->once()->with($reflectionMethod, RestProxy\Call::class)->andReturn($this->annotation);
 
-        $this->annotation->shouldReceive('getProperty')->once()->andReturn('bar');
-        $this->annotation->shouldReceive('getService')->once()->andReturn('test.service');
-        $this->annotation->shouldReceive('getMethod')->once()->andReturn('testMethod');
-        $this->annotation->shouldReceive('getArguments')->once()->andReturn('[$this->id]');
+        $this->annotation->shouldReceive('getProperty')->once()->withNoArgs()->andReturn('bar');
+        $this->annotation->shouldReceive('getService')->once()->withNoArgs()->andReturn('test.service');
+        $this->annotation->shouldReceive('getMethod')->once()->withNoArgs()->andReturn('testMethod');
+        $this->annotation->shouldReceive('getArguments')->once()->withNoArgs()->andReturn('[$this->id]');
 
         $proxyClass = $this->builder->build($reflectionClass);
 
@@ -144,10 +144,10 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
 
         $this->reader->shouldReceive('getMethodAnnotation')->once()->with($reflectionMethod, RestProxy\Call::class)->andReturn($this->annotation);
 
-        $this->annotation->shouldReceive('getProperty')->once()->andReturn('bar');
-        $this->annotation->shouldReceive('getService')->once()->andReturn('test.service');
-        $this->annotation->shouldReceive('getMethod')->once()->andReturn('testMethod');
-        $this->annotation->shouldReceive('getArguments')->once()->andReturn('[$this->id]');
+        $this->annotation->shouldReceive('getProperty')->once()->withNoArgs()->andReturn('bar');
+        $this->annotation->shouldReceive('getService')->once()->withNoArgs()->andReturn('test.service');
+        $this->annotation->shouldReceive('getMethod')->once()->withNoArgs()->andReturn('testMethod');
+        $this->annotation->shouldReceive('getArguments')->once()->withNoArgs()->andReturn('[$this->id]');
 
         $proxyClass = $this->builder->build($reflectionClass);
 
