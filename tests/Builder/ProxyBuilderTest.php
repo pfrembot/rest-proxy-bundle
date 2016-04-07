@@ -4,7 +4,6 @@
  *
  * @author Edward Pfremmer <epfremme@nerdery.com>
  */
-
 namespace Pfrembot\RestProxyBundle\Tests\Builder;
 
 use Doctrine\Common\Annotations\Reader;

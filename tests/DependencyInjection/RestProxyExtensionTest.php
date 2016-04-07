@@ -1,10 +1,9 @@
 <?php
 /**
- * File RestProxyExtension.php.
+ * File RestProxyExtension.php
  *
  * @author Edward Pfremmer <epfremme@nerdery.com>
  */
-
 namespace Pfrembot\RestProxyBundle\Tests\DependencyInjection;
 
 use Pfrembot\RestProxyBundle\DependencyInjection\RestProxyExtension;

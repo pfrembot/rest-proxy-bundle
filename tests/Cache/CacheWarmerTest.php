@@ -4,7 +4,6 @@
  *
  * @author Edward Pfremmer <epfremme@nerdery.com>
  */
-
 namespace Pfrembot\RestProxyBundle\Tests\Cache;
 
 use Pfrembot\RestProxyBundle\Builder\ProxyBuilder;
@@ -82,5 +81,7 @@ class CacheWarmerTest extends \PHPUnit_Framework_TestCase
         $this->classFinder->shouldReceive('getAllClassNames')->once()->withNoArgs()->andReturn([self::class]);
         $this->builder->shouldReceive('build')->once()->with(\ReflectionClass::class)->andReturn($model);
         $this->cache->shouldReceive('write')->once()->with($model, self::class)->andReturnUndefined();
+
+        $this->cacheWarmer->warmUp(__DIR__);
     }
 }
