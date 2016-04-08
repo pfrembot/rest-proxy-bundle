@@ -7,7 +7,8 @@
 namespace Pfrembot\RestProxyBundle\Cache;
 
 use Pfrembot\RestProxyBundle\Builder\ProxyBuilder;
-use Pfrembot\RestProxyBundle\Finder\ProxyClassFinder;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 /**
@@ -18,9 +19,9 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 class CacheWarmer implements CacheWarmerInterface
 {
     /**
-     * @var ProxyClassFinder
+     * @var Finder
      */
-    private $classFinder;
+    private $finder;
 
     /**
      * @var ProxyBuilder
@@ -35,13 +36,13 @@ class CacheWarmer implements CacheWarmerInterface
     /**
      * CacheWarmer constructor
      *
-     * @param ProxyClassFinder $classFinder
+     * @param Finder $finder
      * @param ProxyBuilder $builder
      * @param ProxyCache $cache
      */
-    public function __construct(ProxyClassFinder $classFinder, ProxyBuilder $builder, ProxyCache $cache)
+    public function __construct(Finder $finder, ProxyBuilder $builder, ProxyCache $cache)
     {
-        $this->classFinder = $classFinder;
+        $this->finder = $finder;
         $this->builder = $builder;
         $this->cache = $cache;
     }
@@ -61,11 +62,18 @@ class CacheWarmer implements CacheWarmerInterface
      */
     public function warmUp($cacheDir)
     {
-        $classes = $this->classFinder->getAllClassNames();
+        /** @var SplFileInfo $file */
+        foreach ($this->finder as $file) {
+            $filename = $file->getRelativePath() . '/' . $file->getBasename('.php');
+            $classname = str_replace('/', '\\', $filename);
 
-        foreach ($classes as $class) {
-            $reflection = new \ReflectionClass($class);
+            $reflection = new \ReflectionClass($classname);
+
             $model = $this->builder->build($reflection);
+
+            if (!$model) {
+                continue;
+            }
 
             $this->cache->write($model, $reflection->getName());
         }

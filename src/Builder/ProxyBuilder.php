@@ -9,6 +9,7 @@ namespace Pfrembot\RestProxyBundle\Builder;
 use Doctrine\Common\Annotations\Reader;
 use PhpParser\Builder;
 use PhpParser\BuilderFactory;
+use PhpParser\Lexer;
 use PhpParser\Parser;
 use Pfrembot\RestProxyBundle\Annotation as RestProxy;
 use Pfrembot\RestProxyBundle\Cache\ProxyCache;
@@ -26,11 +27,6 @@ class ProxyBuilder
      * @var BuilderFactory
      */
     private $factory;
-
-    /**
-     * @var Parser
-     */
-    private $parser;
 
     /**
      * @var Reader
@@ -62,13 +58,12 @@ class ProxyBuilder
     /**
      * ProxyBuilder constructor
      *
-     * @param Parser $parser
      * @param Reader $reader
      */
-    public function __construct(Parser $parser, Reader $reader)
+    public function __construct(Reader $reader)
     {
         $this->factory = new BuilderFactory();
-        $this->parser = $parser;
+        $this->parser = new Parser(new Lexer());
         $this->reader = $reader;
     }
 
@@ -76,10 +71,16 @@ class ProxyBuilder
      * Return builder class model
      *
      * @param \ReflectionClass $reflection
-     * @return Builder\Namespace_
+     * @return Builder\Namespace_|false
      */
     public function build(\ReflectionClass $reflection)
     {
+        $annotation = $this->reader->getClassAnnotation($reflection, RestProxy\Entity::class);
+
+        if (!$annotation) {
+            return false;
+        }
+
         $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
         $classModel = $this->buildClass($reflection);
 
@@ -105,7 +106,7 @@ class ProxyBuilder
     {
         return $this->factory->class($reflection->getShortName())
             ->extend('BaseClass')
-            ->implement(ProxyInterface::class)
+            ->implement('\\'.ProxyInterface::class)
             ->makeFinal()
             ->setDocComment('/** ProxyClass */')
             ->addStmt($this->factory->property('__container__')
