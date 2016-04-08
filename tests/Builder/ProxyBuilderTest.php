@@ -35,11 +35,6 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
     private $annotation;
 
     /**
-     * @var Parser
-     */
-    private $parser;
-
-    /**
      * @var PrettyPrinter\Standard
      */
     private $printer;
@@ -57,9 +52,8 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
         $this->reader = \Mockery::mock(Reader::class);
         $this->annotation = \Mockery::mock(RestProxy\Call::class);
 
-        $this->parser = new Parser(new Lexer());
         $this->printer = new PrettyPrinter\Standard();
-        $this->builder = new ProxyBuilder($this->parser, $this->reader);
+        $this->builder = new ProxyBuilder($this->reader);
     }
 
     /**
@@ -80,8 +74,8 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
     public function testConstruct()
     {
         $this->assertAttributeInstanceOf(BuilderFactory::class, 'factory', $this->builder);
-        $this->assertAttributeInstanceOf(Reader::class, 'reader', $this->builder);
         $this->assertAttributeInstanceOf(Parser::class, 'parser', $this->builder);
+        $this->assertAttributeInstanceOf(Reader::class, 'reader', $this->builder);
     }
 
     /**
@@ -102,6 +96,7 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
         $reflectionMethod->shouldReceive('getParameters')->once()->withNoArgs()->andReturn([]);
         $reflectionMethod->shouldReceive('getName')->twice()->withNoArgs()->andReturn('getBar');
 
+        $this->reader->shouldReceive('getClassAnnotation')->once()->with($reflectionClass, RestProxy\Entity::class)->andReturn(true);
         $this->reader->shouldReceive('getMethodAnnotation')->once()->with($reflectionMethod, RestProxy\Call::class)->andReturn($this->annotation);
 
         $this->annotation->shouldReceive('getProperty')->once()->withNoArgs()->andReturn('bar');
@@ -116,7 +111,7 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
         $this->assertEquals('Foo', (string) $proxyClass->getNode()->stmts[2]->name);
         $this->assertEquals(
             $this->trimWhitespace($this->printer->prettyPrintFile([$proxyClass->getNode()])),
-            '<?php namespace RestProxy\Some\NameSpace; use JMS\Serializer\Annotation as JMS; use Some\NameSpace\Foo as BaseClass; /** ProxyClass */ final class Foo extends BaseClass implements Pfrembot\RestProxyBundle\Proxy\ProxyInterface { /** @JMS\Exclude() */ private $__container__; /** ProxyInitializer */ public function __initialize__(\Symfony\Component\DependencyInjection\ContainerInterface $container) { $this->__container__ = $container; } /** ProxyMethod */ public function getBar() { if (!$this->bar) { $this->bar = call_user_func_array(array($this->__container__->get(\'test.service\'), \'testMethod\'), array($this->id)); } return call_user_func_array(\'parent::getBar\', func_get_args()); } }'
+            '<?php namespace RestProxy\Some\NameSpace; use JMS\Serializer\Annotation as JMS; use Some\NameSpace\Foo as BaseClass; /** ProxyClass */ final class Foo extends BaseClass implements \Pfrembot\RestProxyBundle\Proxy\ProxyInterface { /** @JMS\Exclude() */ private $__container__; /** ProxyInitializer */ public function __initialize__(\Symfony\Component\DependencyInjection\ContainerInterface $container) { $this->__container__ = $container; } /** ProxyMethod */ public function getBar() { if (!$this->bar) { $this->bar = call_user_func_array(array($this->__container__->get(\'test.service\'), \'testMethod\'), array($this->id)); } return call_user_func_array(\'parent::getBar\', func_get_args()); } }'
         );
     }
 
@@ -141,6 +136,7 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
 
         $reflectionParameter->shouldReceive('getName')->once()->withNoArgs()->andReturn('arg1');
 
+        $this->reader->shouldReceive('getClassAnnotation')->once()->with($reflectionClass, RestProxy\Entity::class)->andReturn(true);
         $this->reader->shouldReceive('getMethodAnnotation')->once()->with($reflectionMethod, RestProxy\Call::class)->andReturn($this->annotation);
 
         $this->annotation->shouldReceive('getProperty')->once()->withNoArgs()->andReturn('bar');
@@ -155,7 +151,7 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
         $this->assertEquals('Foo', (string) $proxyClass->getNode()->stmts[2]->name);
         $this->assertEquals(
             $this->trimWhitespace($this->printer->prettyPrintFile([$proxyClass->getNode()])),
-            '<?php namespace RestProxy\Some\NameSpace; use JMS\Serializer\Annotation as JMS; use Some\NameSpace\Foo as BaseClass; /** ProxyClass */ final class Foo extends BaseClass implements Pfrembot\RestProxyBundle\Proxy\ProxyInterface { /** @JMS\Exclude() */ private $__container__; /** ProxyInitializer */ public function __initialize__(\Symfony\Component\DependencyInjection\ContainerInterface $container) { $this->__container__ = $container; } /** ProxyMethod */ public function getBar($arg1) { if (!$this->bar) { $this->bar = call_user_func_array(array($this->__container__->get(\'test.service\'), \'testMethod\'), array($this->id)); } return call_user_func_array(\'parent::getBar\', func_get_args()); } }'
+            '<?php namespace RestProxy\Some\NameSpace; use JMS\Serializer\Annotation as JMS; use Some\NameSpace\Foo as BaseClass; /** ProxyClass */ final class Foo extends BaseClass implements \Pfrembot\RestProxyBundle\Proxy\ProxyInterface { /** @JMS\Exclude() */ private $__container__; /** ProxyInitializer */ public function __initialize__(\Symfony\Component\DependencyInjection\ContainerInterface $container) { $this->__container__ = $container; } /** ProxyMethod */ public function getBar($arg1) { if (!$this->bar) { $this->bar = call_user_func_array(array($this->__container__->get(\'test.service\'), \'testMethod\'), array($this->id)); } return call_user_func_array(\'parent::getBar\', func_get_args()); } }'
         );
     }
 
@@ -174,6 +170,7 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
         $reflectionClass->shouldReceive('getNamespaceName')->once()->withNoArgs()->andReturn('Some\\NameSpace');
         $reflectionClass->shouldReceive('getName')->once()->withNoArgs()->andReturn('Some\\NameSpace\\Foo');
 
+        $this->reader->shouldReceive('getClassAnnotation')->once()->with($reflectionClass, RestProxy\Entity::class)->andReturn(true);
         $this->reader->shouldReceive('getMethodAnnotation')->once()->with($reflectionMethod, RestProxy\Call::class)->andReturnNull();
 
         $this->annotation->shouldNotReceive('getProperty');
@@ -188,7 +185,30 @@ class ProxyBuilderTest extends\PHPUnit_Framework_TestCase
         $this->assertEquals('Foo', (string) $proxyClass->getNode()->stmts[2]->name);
         $this->assertEquals(
             $this->trimWhitespace($this->printer->prettyPrintFile([$proxyClass->getNode()])),
-            '<?php namespace RestProxy\Some\NameSpace; use JMS\Serializer\Annotation as JMS; use Some\NameSpace\Foo as BaseClass; /** ProxyClass */ final class Foo extends BaseClass implements Pfrembot\RestProxyBundle\Proxy\ProxyInterface { /** @JMS\Exclude() */ private $__container__; /** ProxyInitializer */ public function __initialize__(\Symfony\Component\DependencyInjection\ContainerInterface $container) { $this->__container__ = $container; } }'
+            '<?php namespace RestProxy\Some\NameSpace; use JMS\Serializer\Annotation as JMS; use Some\NameSpace\Foo as BaseClass; /** ProxyClass */ final class Foo extends BaseClass implements \Pfrembot\RestProxyBundle\Proxy\ProxyInterface { /** @JMS\Exclude() */ private $__container__; /** ProxyInitializer */ public function __initialize__(\Symfony\Component\DependencyInjection\ContainerInterface $container) { $this->__container__ = $container; } }'
         );
+    }
+
+    /**
+     * @covers ::build
+     */
+    public function testBuildWithNoClassAnnotation()
+    {
+        $reflectionClass = \Mockery::mock(\ReflectionClass::class);
+
+        $reflectionClass->shouldNotReceive('getMethods');
+        $reflectionClass->shouldNotReceive('getShortName');
+        $reflectionClass->shouldNotReceive('getNamespaceName');
+        $reflectionClass->shouldNotReceive('getName');
+
+        $this->reader->shouldReceive('getClassAnnotation')->once()->with($reflectionClass, RestProxy\Entity::class)->andReturn(false);
+        $this->reader->shouldNotReceive('getMethodAnnotation');
+
+        $this->annotation->shouldNotReceive('getProperty');
+        $this->annotation->shouldNotReceive('getService');
+        $this->annotation->shouldNotReceive('getMethod');
+        $this->annotation->shouldNotReceive('getArguments');
+
+        $this->assertFalse($this->builder->build($reflectionClass));
     }
 }

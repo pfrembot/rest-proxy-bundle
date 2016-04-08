@@ -9,8 +9,9 @@ namespace Pfrembot\RestProxyBundle\Tests\Cache;
 use Pfrembot\RestProxyBundle\Builder\ProxyBuilder;
 use Pfrembot\RestProxyBundle\Cache\CacheWarmer;
 use Pfrembot\RestProxyBundle\Cache\ProxyCache;
-use Pfrembot\RestProxyBundle\Finder\ProxyClassFinder;
 use PhpParser\Builder;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Class CacheWarmerTest
@@ -22,9 +23,9 @@ use PhpParser\Builder;
 class CacheWarmerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var ProxyClassFinder|\Mockery\MockInterface
+     * @var Finder|\Mockery\MockInterface
      */
-    private $classFinder;
+    private $finder;
 
     /**
      * @var ProxyBuilder|\Mockery\MockInterface
@@ -46,11 +47,11 @@ class CacheWarmerTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->classFinder = \Mockery::mock(ProxyClassFinder::class);
+        $this->finder = \Mockery::mock(Finder::class);
         $this->builder = \Mockery::mock(ProxyBuilder::class);
         $this->cache = \Mockery::mock(ProxyCache::class);
 
-        $this->cacheWarmer = new CacheWarmer($this->classFinder, $this->builder, $this->cache);
+        $this->cacheWarmer = new CacheWarmer($this->finder, $this->builder, $this->cache);
     }
 
     /**
@@ -58,7 +59,7 @@ class CacheWarmerTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstruct()
     {
-        $this->assertAttributeInstanceOf(ProxyClassFinder::class, 'classFinder', $this->cacheWarmer);
+        $this->assertAttributeInstanceOf(Finder::class, 'finder', $this->cacheWarmer);
         $this->assertAttributeInstanceOf(ProxyBuilder::class, 'builder', $this->cacheWarmer);
         $this->assertAttributeInstanceOf(ProxyCache::class, 'cache', $this->cacheWarmer);
     }
@@ -78,9 +79,33 @@ class CacheWarmerTest extends \PHPUnit_Framework_TestCase
     {
         $model = \Mockery::mock(Builder\Namespace_::class);
 
-        $this->classFinder->shouldReceive('getAllClassNames')->once()->withNoArgs()->andReturn([self::class]);
+        $directory = str_replace('\\', '/', __NAMESPACE__);
+        $classname = explode('\\', __CLASS__);
+
+        $fileInfo = new SplFileInfo(__FILE__, $directory, end($classname));
+        $iterator = new \ArrayIterator([$fileInfo]);
+
+        $this->finder->shouldReceive('getIterator')->once()->withNoArgs()->andReturn($iterator);
         $this->builder->shouldReceive('build')->once()->with(\ReflectionClass::class)->andReturn($model);
         $this->cache->shouldReceive('write')->once()->with($model, self::class)->andReturnUndefined();
+
+        $this->cacheWarmer->warmUp(__DIR__);
+    }
+
+    /**
+     * @covers ::warmUp
+     */
+    public function testWarmUpWithNoAnnotation()
+    {
+        $directory = str_replace('\\', '/', __NAMESPACE__);
+        $classname = explode('\\', __CLASS__);
+
+        $fileInfo = new SplFileInfo(__FILE__, $directory, end($classname));
+        $iterator = new \ArrayIterator([$fileInfo]);
+
+        $this->finder->shouldReceive('getIterator')->once()->withNoArgs()->andReturn($iterator);
+        $this->builder->shouldReceive('build')->once()->with(\ReflectionClass::class)->andReturn(false);
+        $this->cache->shouldNotReceive('write');
 
         $this->cacheWarmer->warmUp(__DIR__);
     }

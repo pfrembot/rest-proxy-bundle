@@ -3,11 +3,12 @@ parameters:
 
 services:
 
+    ## PhpParser Services
     pfrembot_rest_proxy.php_parser.printer:
         public: false
         class: PhpParser\PrettyPrinter\Standard
 
-    # Symfony services
+    ## Symfony Services
     pfrembot_rest_proxy.symfony.filesystem:
         public: false
         class: Symfony\Component\Filesystem\Filesystem
@@ -22,14 +23,14 @@ services:
             - [exclude, ['%pfrembot_rest_proxy.excluded_directories%']]
 
 
-    # rest proxy builder services
+    ## RestProxy Builder Services
     pfrembot_rest_proxy.builder.proxy_builder:
         public: false
         class: Pfrembot\RestProxyBundle\Builder\ProxyBuilder
         arguments:
             - '@annotation_reader'
 
-    ## proxy cache services
+    ## RestProxy Cache Services
     pfrembot_rest_proxy.proxy_cache:
         public: false
         class: Pfrembot\RestProxyBundle\Cache\ProxyCache
@@ -48,7 +49,7 @@ services:
         tags:
             - { name: kernel.cache_warmer }
 
-    ## proxy serializer subscriber
+    ## JMS Serializer Subscriber
     pfrembot_rest_proxy.serializer.subscriber:
         class: Pfrembot\RestProxyBundle\Subscriber\SerializerSubscriber
         arguments:
