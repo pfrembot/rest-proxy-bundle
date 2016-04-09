@@ -9,12 +9,13 @@ namespace Pfrembot\RestProxyBundle\Annotation;
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Entity
+ * Class Entity
  *
  * Designates the class as a Hateoas API entity
  *
  * @Annotation
  * @Target("CLASS")
+ * @package Pfrembot\RestProxyBundle\Annotation
  */
 class Entity extends Annotation
 {

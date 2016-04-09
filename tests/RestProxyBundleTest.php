@@ -40,7 +40,7 @@ class RestProxyBundleTest extends \PHPUnit_Framework_TestCase
     public function testBoot()
     {
         $this->container->shouldReceive('getParameter')->once()->with('kernel.cache_dir')->andReturn('/tmp');
-        $this->container->shouldReceive('getParameter')->once()->with('kernel.root_dir')->andReturn(__DIR__.'/_mock/vendor');
+        $this->container->shouldReceive('getParameter')->once()->with('kernel.root_dir')->andReturn(__DIR__ . '/_mocks/vendor');
 
         $this->bundle->boot();
     }

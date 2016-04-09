@@ -16,6 +16,7 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * @Annotation
  * @Target("METHOD")
+ * @package Pfrembot\RestProxyBundle\Annotation
  */
 class Call extends Annotation
 {
@@ -40,6 +41,11 @@ class Call extends Annotation
     public $arguments = "array()";
 
     /**
+     * Return proxy service
+     *
+     * Proxy service to use for loading embedded class data on
+     * the target property
+     *
      * @return string
      */
     public function getService()
@@ -52,6 +58,11 @@ class Call extends Annotation
     }
 
     /**
+     * Return proxy service method
+     *
+     * This is the method to be called on the proxied service
+     * for LAZY loading entity values
+     *
      * @return string
      */
     public function getMethod()
@@ -64,6 +75,11 @@ class Call extends Annotation
     }
 
     /**
+     * Return property
+     *
+     * Class property to be hydrated if the property is
+     * currently falsy on the entity
+     *
      * @return string
      */
     public function getProperty()
@@ -76,10 +92,21 @@ class Call extends Annotation
     }
 
     /**
+     * Return proxy call method arguments array string
+     *
+     * This must return PHP array string syntax so it can be parsed by
+     * the PhpParser during proxy class building
+     *
      * @return string
      */
     public function getArguments()
     {
+        if (!is_string($this->arguments)) {
+            throw new \LogicException(
+                'Must be PHP array syntax string (e.g. "[$this->id]") to be parsed during proxy class builder'
+            );
+        }
+
         return $this->arguments;
     }
 }

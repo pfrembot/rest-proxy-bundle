@@ -139,6 +139,8 @@ class ProxyBuilder
         }
 
         $parameters = array_map(function(\ReflectionParameter $parameter) {
+            // @todo: add support for default parameter values
+            // @todo: add support for type hinted parameters
             return $this->factory->param($parameter->getName());
         }, $method->getParameters());
 

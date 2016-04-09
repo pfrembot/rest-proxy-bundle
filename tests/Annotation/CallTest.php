@@ -113,4 +113,17 @@ class CallTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('[$this->id]', $annotation->getArguments());
     }
+
+    /**
+     * @covers ::getArguments
+     * @expectedException \LogicException
+     */
+    public function testGetArgumentsException()
+    {
+        $annotation = new RestProxy\Call([
+            'arguments' => ['$this->id'],
+        ]);
+
+        $annotation->getArguments();
+    }
 }
