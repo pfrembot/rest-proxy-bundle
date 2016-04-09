@@ -51,10 +51,37 @@ class LinkTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers ::getLink
+     * @expectedException \LogicException
      */
     public function testGetLinkException()
     {
+        $annotation = new RestProxy\Link([]);
 
+        $annotation->getLink();
+    }
+
+    /**
+     * @covers ::getProperty
+     */
+    public function testGetProperty()
+    {
+        $annotation = new RestProxy\Link([
+            'property' => 'testKey',
+        ]);
+
+        $this->assertEquals('testKey', $annotation->getProperty());
+    }
+
+    /**
+     * @covers ::getProperty
+     */
+    public function testGetPropertyFromValue()
+    {
+        $annotation = new RestProxy\Link([
+            'value' => 'testKey',
+        ]);
+
+        $this->assertEquals('testKey', $annotation->getProperty());
     }
 
     /**

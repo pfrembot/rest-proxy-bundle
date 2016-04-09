@@ -35,6 +35,18 @@ class Link extends Call
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getProperty()
+    {
+        if (!$this->property) {
+            $this->property = $this->value;
+        }
+
+        return parent::getProperty();
+    }
+
+    /**
      * Return link url as proxy method argument
      *
      * {@inheritdoc}
