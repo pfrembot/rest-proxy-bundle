@@ -16,6 +16,7 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * @Annotation
  * @Target("METHOD")
+ *
  * @package Pfrembot\RestProxyBundle\Annotation
  */
 class Call extends Annotation

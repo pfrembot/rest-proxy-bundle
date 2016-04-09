@@ -15,6 +15,7 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * @Annotation
  * @Target("CLASS")
+ *
  * @package Pfrembot\RestProxyBundle\Annotation
  */
 class Entity extends Annotation
