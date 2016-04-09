@@ -17,7 +17,7 @@ use Pfrembot\RestProxyBundle\Entity\Link;
 trait LinkDictionaryTrait
 {
     /**
-     * @JMS\Type("array<Pfrembot\RestProxyBundle\Entity\Link>")
+     * @JMS\Type("array<string,Pfrembot\RestProxyBundle\Entity\Link>")
      *
      * @var array|Link[]
      */
