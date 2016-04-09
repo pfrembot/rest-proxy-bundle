@@ -7,9 +7,11 @@
 namespace Pfrembot\RestProxyBundle\Builder;
 
 use Doctrine\Common\Annotations\Reader;
+use Pfrembot\RestProxyBundle\Mixin\LinkDictionaryTrait;
 use PhpParser\Builder;
 use PhpParser\BuilderFactory;
 use PhpParser\Lexer;
+use PhpParser\Node;
 use PhpParser\Parser;
 use Pfrembot\RestProxyBundle\Annotation as RestProxy;
 use Pfrembot\RestProxyBundle\Cache\ProxyCache;
@@ -138,6 +140,10 @@ class ProxyBuilder
             return false;
         }
 
+        if ($annotation instanceof RestProxy\Link) {
+            $this->addLinkDictionary($class);
+        }
+
         $parameters = array_map(function(\ReflectionParameter $parameter) {
             // @todo: add support for default parameter values
             // @todo: add support for type hinted parameters
@@ -156,5 +162,25 @@ class ProxyBuilder
                 $annotation->getArguments()
             )))
         );
+    }
+
+    /**
+     * Add a single link dictionary trait statement to
+     * the class model
+     *
+     * @param Builder\Class_ $class
+     * @reutnr void
+     */
+    private function addLinkDictionary(Builder\Class_ $class)
+    {
+        foreach ($class->getNode()->stmts as $stmt) {
+            if ($stmt instanceof  Node\Stmt\TraitUse) {
+                return;
+            }
+        }
+
+        $class->addStmt(new Node\Stmt\TraitUse([
+            new Node\Name('\\' . LinkDictionaryTrait::class),
+        ]));
     }
 }
