@@ -7,15 +7,15 @@
 namespace Pfrembot\RestProxyBundle\Builder;
 
 use Doctrine\Common\Annotations\Reader;
+use Pfrembot\RestProxyBundle\Annotation as RestProxy;
+use Pfrembot\RestProxyBundle\Cache\ProxyCache;
 use Pfrembot\RestProxyBundle\Mixin\LinkDictionaryTrait;
+use Pfrembot\RestProxyBundle\Proxy\ProxyInterface;
 use PhpParser\Builder;
 use PhpParser\BuilderFactory;
 use PhpParser\Lexer;
 use PhpParser\Node;
 use PhpParser\Parser;
-use Pfrembot\RestProxyBundle\Annotation as RestProxy;
-use Pfrembot\RestProxyBundle\Cache\ProxyCache;
-use Pfrembot\RestProxyBundle\Proxy\ProxyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
