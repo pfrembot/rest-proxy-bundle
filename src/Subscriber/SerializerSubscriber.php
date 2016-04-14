@@ -14,6 +14,7 @@ use JMS\Serializer\EventDispatcher\PreDeserializeEvent;
 use Pfrembot\RestProxyBundle\Annotation\Entity;
 use Pfrembot\RestProxyBundle\Cache\ProxyCache;
 use Pfrembot\RestProxyBundle\Proxy\ProxyInterface;
+use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -62,7 +63,7 @@ class SerializerSubscriber implements EventSubscriberInterface
     public function onPreDeserialize(PreDeserializeEvent $event)
     {
         $name = $event->getType()['name'];
-        $class = new \ReflectionClass($name);
+        $class = new ReflectionClass($name);
 
         if ($annotation = $this->reader->getClassAnnotation($class, Entity::class)) {
             $event->setType(sprintf('%s\\%s', ProxyCache::NAMESPACE_PREFIX, $name));
