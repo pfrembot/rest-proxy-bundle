@@ -21,7 +21,7 @@ trait LinkDictionaryTrait
      *
      * @var array|Link[]
      */
-    private $_links = [];
+    private $links = [];
 
     /**
      * Return class link url
@@ -31,12 +31,12 @@ trait LinkDictionaryTrait
      */
     protected function getLink($key)
     {
-        if (!array_key_exists($key, $this->_links)) {
+        if (!array_key_exists($key, $this->links)) {
             throw new \LogicException(
-                sprintf('Link "%s" not found on class. Available links [%s]', $key, join(',', array_keys($this->_links)))
+                sprintf('Link "%s" not found on class. Available links [%s]', $key, join(',', array_keys($this->links)))
             );
         }
 
-        return $this->_links[$key];
+        return $this->links[$key];
     }
 }
